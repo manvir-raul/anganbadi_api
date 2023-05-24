@@ -1,4 +1,5 @@
 const express = require("express");
+require("dotenv").config();
 const cors = require("cors");
 
 const app = express();
@@ -18,17 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 const db = require("./models");
 const Role = db.role;
 
-const password = "7vkBxoJm4eCqBnoG";
-
 const dbConfig = require("./config/db.config");
 db.mongoose
-  .connect(
-    `mongodb+srv://manvirsinghraul:7vkBxoJm4eCqBnoG@cluster0.7vbl9a6.mongodb.net/anganbadi_db?retryWrites=true&w=majority`,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
+  .connect(process.env.MONGO_DB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then((client) => {
     console.log("Successfully connect to MongoDB.");
     initial();
