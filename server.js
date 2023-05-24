@@ -23,7 +23,7 @@ const password = "7vkBxoJm4eCqBnoG";
 const dbConfig = require("./config/db.config");
 db.mongoose
   .connect(
-    `mongodb+srv://manvirsinghraul:${password}@cluster0.7vbl9a6.mongodb.net/anganbadi_db?retryWrites=true&w=majority`,
+    `mongodb+srv://manvirsinghraul:7vkBxoJm4eCqBnoG@cluster0.7vbl9a6.mongodb.net/anganbadi_db?retryWrites=true&w=majority`,
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,

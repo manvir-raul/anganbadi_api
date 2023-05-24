@@ -1,15 +1,19 @@
 const mongoose = require("mongoose");
 
 const member = new mongoose.Schema({
-  member: { type: mongoose.ObjectId, ref: "Inhabitant" },
+  _id: { type: mongoose.ObjectId, ref: "Inhabitant" },
   relation_with_head: String,
 });
 
 const Family = mongoose.model(
   "family",
   new mongoose.Schema({
-    id: Number,
-    members: [member],
+    _id: Number,
+    family_head: { type: mongoose.ObjectId, ref: "Inhabitant" },
+    members: {
+      type: [member],
+      default: undefined,
+    },
   })
 );
 

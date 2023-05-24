@@ -45,7 +45,7 @@ const inhabitantSchema = new mongoose.Schema({
   pension_number: String,
   pension_type: String,
   family_number: {
-    type: mongoose.ObjectId,
+    type: Number,
     ref: "Family",
   },
 });

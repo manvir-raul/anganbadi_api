@@ -9,10 +9,13 @@ const inhabitant = (app) => {
     next();
   });
 
-  app.get("/api/inhabitant/detail/:inhabitantID", controller.inhabitantDetails);
   app.post("/api/inhabitant/list", controller.inhabitantList);
 
   app.post("/api/inhabitant/add", controller.addInhabitant);
+  app.get("/api/inhabitant/lookup", controller.lookUpInhabitant);
+
+  app.get("/api/inhabitant/detail/:inhabitantID", controller.inhabitantDetails);
+  app.put("/api/inhabitant/update/:inhabitantID", controller.updateInhabitant);
 };
 
 module.exports = inhabitant;
