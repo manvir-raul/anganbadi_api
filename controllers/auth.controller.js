@@ -72,7 +72,7 @@ exports.signin = (req, res) => {
     }
 
     var token = jwt.sign({ id: user._id }, config.secret, {
-      expiresIn: 60, // min
+      expiresIn: 3600000, // min
     });
 
     res.status(200).send({
@@ -84,6 +84,32 @@ exports.signin = (req, res) => {
       email: user.email,
       role: user.role,
       accessToken: token,
+    });
+  });
+};
+exports.authenticate = (req, res) => {
+  const tokenUser = req.user;
+  console.log("tokenUser", tokenUser);
+  User.findById({
+    _id: tokenUser.id,
+  }).exec((err, user) => {
+    if (err) {
+      res.status(500).send({ message: err });
+      return;
+    }
+
+    if (!user) {
+      return res.status(404).send({ message: "User Not found." });
+    }
+
+    res.status(200).send({
+      _id: user._id,
+      name: user.name,
+      first_name: user.first_name,
+      middle_name: user.middle_name,
+      last_name: user.last_name,
+      email: user.email,
+      role: user.role,
     });
   });
 };
