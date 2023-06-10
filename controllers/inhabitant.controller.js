@@ -92,13 +92,109 @@ const saveFamilyDetails = (req, res, inhabitant_id) => {
 };
 
 exports.inhabitantList = (req, res) => {
-  Inhabitant.find({}).exec((err, list) => {
-    if (err) {
-      res.status(500).send({ message: err });
-      return;
-    }
-    res.send({ list });
-  });
+  const {
+    limit = 10,
+    offset = 0,
+    page = 1,
+    sort = "_id",
+    order = "desc",
+  } = req.body;
+
+  let skip = (page - 1) * limit + offset;
+
+  const sortOrder = { [sort]: order === "desc" ? -1 : 1 };
+  console.log("global", global);
+  // Inhabitant.find({})
+  //   .sort(sortOrder)
+  //   .skip(skip)
+  //   .limit(limit)
+  //   .exec((err, list) => {
+  //     if (err) {
+  //       res.status(500).send({ message: err });
+  //       return;
+  //     }
+  //     res.send({ list });
+  //   });
+
+  Inhabitant.aggregate([
+    { $match: {} },
+    { $sort: sortOrder },
+    {
+      $lookup: {
+        from: "inhabitants",
+        localField: "spouse_name",
+        foreignField: "_id",
+        as: "spouse_name",
+      },
+    },
+    { $unwind: "$spouse_name" },
+    {
+      $lookup: {
+        from: "inhabitants",
+        localField: "father_name",
+        foreignField: "_id",
+        as: "father_name",
+      },
+    },
+    { $unwind: "$father_name" },
+    {
+      $lookup: {
+        from: "inhabitants",
+        localField: "mother_name",
+        foreignField: "_id",
+        as: "mother_name",
+      },
+    },
+    { $unwind: "$mother_name" },
+    {
+      $group: {
+        _id: null,
+        results: {
+          // $push: {
+          //   name: "$name",
+          //   // father_name: "$father_name",
+          //   // mother_name: "$mother_name",
+          //   // spouse_name: "$spouse_name",
+          //   // bank_details: {
+          //   //   bank_name: "$bank_name,
+          //   //   bank_account_number: "$bank_account_number,
+          //   //   bank_ifsc_code: "$bank_ifsc_code,
+          //   // },
+          //   gender: "$gender",
+          //   adhar_card: "$adhar_card",
+          //   age: "$age",
+          //   caste: "$caste",
+          //   date_of_birth: "$date_of_birth",
+          //   is_pensioner: "$is_pensioner",
+          //   marital_status: "$marital_status",
+          //   pan_card: "$pan_card",
+          //   pension_number: "$pension_number",
+          //   pension_type: "$pension_type",
+          //   family_number: "$family_number",
+          // },
+          $push: "$$ROOT",
+        },
+        count: { $count: {} },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        count: 1,
+        rows: { $slice: ["$results", skip, limit] },
+      },
+    },
+  ])
+    .allowDiskUse(true)
+    .then(([{ count, rows }]) => {
+      return res.send({ data: { count, rows } });
+    })
+    .catch((error) => {
+      console.log("error", error);
+      return res.send({
+        data: { count: 0, rows: [] },
+      });
+    });
 };
 
 const getData = (req) => ({
@@ -241,11 +337,10 @@ exports.inhabitantDetails = async (req, res) => {
     },
   ]).exec((err, inhabitant) => {
     if (err) {
-      console.log("req manvir singh njn", err);
+      console.log("req", err);
       res.status(500).send({ message: "man" });
       return;
     }
-    console.log("manvir", inhabitant);
     res.send({ inhabitant: inhabitant[0] });
   });
 };
@@ -258,7 +353,7 @@ exports.lookUpInhabitant = (req, res) => {
     { name: 1, father_name: 1 }
   ).exec((err, inhabitants) => {
     if (err) {
-      console.log("req manvir singh njn", err);
+      console.log("error", err);
       res.status(500).send({ message: "man" });
       return;
     }

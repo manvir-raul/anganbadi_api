@@ -56,8 +56,6 @@ exports.signin = (req, res) => {
       return;
     }
 
-    console.log("sign in user", user);
-
     if (!user) {
       return res.status(404).send({ message: "User Not found." });
     }
@@ -75,6 +73,10 @@ exports.signin = (req, res) => {
       expiresIn: 3600000, // min
     });
 
+    session = req.session;
+    session.user_id = user._id.toString();
+    session.token = token;
+
     res.status(200).send({
       _id: user._id,
       name: user.name,
@@ -89,7 +91,6 @@ exports.signin = (req, res) => {
 };
 exports.authenticate = (req, res) => {
   const tokenUser = req.user;
-  console.log("tokenUser", tokenUser);
   User.findById({
     _id: tokenUser.id,
   }).exec((err, user) => {

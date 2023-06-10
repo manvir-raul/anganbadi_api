@@ -17,8 +17,16 @@ const verifyToken = (req, res, next) => {
     // Verify the token using your secret key
     const decoded = jwt.verify(token, config.secret);
     req.user = decoded; // Store the decoded user information in the request object
-    next(); // Call the next middleware or route handler
+    const session = req.session;
+    if (decoded.id === session.user_id) {
+      next(); // Call the next middleware or route handler
+    } else {
+      throw {
+        message: "Token Mismatched!",
+      };
+    }
   } catch (error) {
+    console.log("error", error);
     return res.status(403).json({ message: "Invalid token." });
   }
 };

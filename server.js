@@ -8,13 +8,37 @@ const cors = require("cors");
 const app = express();
 
 const corsOptions = {
+  //To allow requests from client
   origin: process.env.CORS_ORIGIN,
+  credentials: true,
+  exposedHeaders: ["set-cookie"],
 };
 
-const store = new MongoDBStore({
-  uri: process.env.MONGO_DB_URL,
-  collection: "mySessions",
+const store = new MongoDBStore(
+  {
+    uri: process.env.MONGO_DB_URL,
+    collection: "mySessions",
+  },
+  function (error) {
+    console.log("error1", error);
+  }
+);
+
+store.on("error", function (error) {
+  console.log("error2", error);
 });
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET_KEY,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+    },
+    store: store,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
 app.use(cors(corsOptions));
 app.options("*", cors());
